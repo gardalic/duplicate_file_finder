@@ -1,6 +1,6 @@
 import os
-import sys
 from collections import Counter
+# import pdb
 
 
 class FindDupes:
@@ -8,13 +8,12 @@ class FindDupes:
         List out files on a location and create a list duplicate files (by name) and their path.
     """
 
-    def __init__(self, start_dir=None, output_file=None):
+    def __init__(self, start_dir=os.getcwd()):
         """
-            If start_dir is omited it will use the directory the script is run from. If output_file is omitted, it will generate 'file_list.csv' in the same location.
+            If start_dir is omited it will use the directory the script is run from. If output_loc is omitted, it will generate 'file_list.csv' in the same location.
         """
         # TODO when you see it works, add extension option
         self.start_dir = start_dir
-        self.output_file = output_file
         self.duplicates = []
 
     def find_duplicates(self):
@@ -25,21 +24,49 @@ class FindDupes:
         print("Starting search...")
         for root, subdir, file in os.walk(self.start_dir):
             for f in file:
-                all_files.append([file, os.path.join(root, f)])
+                all_files.append([root, f])
 
-        files_count = Counter([file[0] for file in all_files])
-        print(f"Found {len(files_count)} unique files...")
+        files_count = Counter([file[1] for file in all_files])
 
-        self.duplicates = [file for file in all_files if files_count[file[0]] > 1]
+        self.duplicates = [
+            file for file in all_files if files_count[file[1]] > 1]
+
         print(f"Processing finished, found {len(self.duplicates)} duplicates")
 
-    def build_file(self, dup_list):
+    def build_file(self, output_loc=os.getcwd()):
         """
-            Overwrites the file at the location specified by output_file (default: where the script was run from). The delimiter is set to ','. 
+            Overwrites the file at the location specified by output_loc (default: where the script was run from). The delimiter is set to ','. 
         """
-        if len(dup_list) > 0:
-            with open(self.output_file, 'w') as f:
+        if len(self.duplicates) > 0:
+            save_path = os.path.join(output_loc, 'file_list.csv')
+            err_list = []
+            with open(save_path, 'w') as f:
                 try:
-                    f.writelines((f"{file[0]},{file[1]}\n" for file in dup_list)) # Format with delimiter and line terminator
+                    for file in self.duplicates:
+                        try:
+                            # Format with delimiter and line terminator
+                            f.write(f"{file[0]},{file[1]}\n")
+                        except UnicodeEncodeError:
+                            err_list.append(f"{file[0]},{file[1]}")
+                        if err_list:
+                            with open(os.path.join(output_loc, 'file_list_err.csv'), 'w', encoding='utf-8') as ef:
+                                for line in err_list:
+                                    ef.write(f"{line}\n")
+                    print(f"Finished writing file, file location: {save_path}")
                 except IOError:
-                    print(f"Couldn't create file ")
+                    print(f"Couldn't create file at {save_path}")
+                    raise IOError
+
+
+if __name__ == '__main__':
+    # TODO incorporate argparse
+    start_loc = input("Enter the starting location for the search: ")
+    out_loc = input("Enter the output location for the CSV: ")
+
+    df = FindDupes(start_loc)
+    df.find_duplicates()
+
+    if len(df.duplicates) > 0:
+        df.build_file(out_loc)
+    else:
+        print("No duplicates found...")
