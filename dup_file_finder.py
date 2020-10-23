@@ -33,29 +33,31 @@ class FindDupes:
 
         print(f"Processing finished, found {len(self.duplicates)} duplicates")
 
-    def build_file(self, output_loc=os.getcwd()):
+    def build_file(self, lst, output_loc=os.getcwd()):
         """
             Overwrites the file at the location specified by output_loc (default: where the script was run from). The delimiter is set to ','. 
         """
-        if len(self.duplicates) > 0:
+        if len(lst) > 0:
             save_path = os.path.join(output_loc, 'file_list.csv')
             err_list = []
             with open(save_path, 'w') as f:
                 try:
-                    for file in self.duplicates:
+                    for file in lst:
                         try:
                             # Format with delimiter and line terminator
                             f.write(f"{file[0]},{file[1]}\n")
                         except UnicodeEncodeError:
                             err_list.append(f"{file[0]},{file[1]}")
-                        if err_list:
-                            with open(os.path.join(output_loc, 'file_list_err.csv'), 'w', encoding='utf-8') as ef:
-                                for line in err_list:
-                                    ef.write(f"{line}\n")
+                    if err_list:
+                        with open(os.path.join(output_loc, 'file_list_err.csv'), 'w', encoding='utf-8') as ef:
+                            for line in err_list:
+                                ef.write(f"{line}\n")
                     print(f"Finished writing file, file location: {save_path}")
                 except IOError:
                     print(f"Couldn't create file at {save_path}")
                     raise IOError
+        else:
+            print("List is empty...")
 
 
 if __name__ == '__main__':
@@ -65,8 +67,4 @@ if __name__ == '__main__':
 
     df = FindDupes(start_loc)
     df.find_duplicates()
-
-    if len(df.duplicates) > 0:
-        df.build_file(out_loc)
-    else:
-        print("No duplicates found...")
+    df.build_file(df.duplicates, out_loc)
