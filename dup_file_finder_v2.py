@@ -20,8 +20,8 @@ class FindDupes:
 
     def find_files(self):
         """
-            Lists out all files, creates a dictionary of unique file names with a list off all parent folders 
-            it found the file. It then goes through the list and pops the files that have a snigle parent
+            Lists out all files, creates a dictionary of unique file names with a list off all parent 
+            folders it found the file.
         """
         print("Starting search...")
         for root, subdir, file in os.walk(self.start_dir):
@@ -32,15 +32,19 @@ class FindDupes:
                     if not self.all_files.get(f):
                         self.all_files[f] = []
                     self.all_files[f].append(os.path.abspath(root))
+        print(f"Processing finished, listed all files in {self.start_dir}")
 
+    def keep_dupes(self):
+        """ Method that goes through the list and pops the files that have a single parent. Split off
+        from find_files so find_files can be used alone. """
         counter = 0  # just for the print, not really needed
-        working_dict = {key: value for (key, value) in self.all_files.items()}
-        for k in working_dict:
-            if len(working_dict[k]) == 1:
-                self.all_files.pop(k)
+        file_names = [name for name in self.all_files.keys()]
+        for name in file_names:
+            if len(self.all_files[name]) == 1:
+                self.all_files.pop(name)
             else:
                 # it won't count the original
-                counter += len(working_dict[k]) - 1
+                counter += len(self.all_files[name]) - 1
 
         print(f"Processing finished, found {counter} duplicates")
 
@@ -74,4 +78,5 @@ if __name__ == '__main__':
 
     df = FindDupes(start_loc, out_loc, ext)
     df.find_files()
+    df.keep_dupes()
     df.build_output()
