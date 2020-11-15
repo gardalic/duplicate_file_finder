@@ -9,20 +9,16 @@ class FindDupes:
     """
 
     def __init__(self, start_dir=os.getcwd(), output_loc=os.getcwd(), extension=''):
-        """
-            If start_dir is omited it will use the directory the script is run from. If output_loc is
-            omitted, it will generate 'file_list.csv' in the same location.
-        """
+        """If start_dir is omited it will use the directory the script is run from. If output_loc is
+            omitted, it will generate 'file_list.csv' in the same location."""
         self.start_dir = start_dir
         self.output_loc = output_loc
         self.all_files = {}
         self.extension = extension
 
     def find_files(self):
-        """
-            Lists out all files, creates a dictionary of unique file names with a list off all parent 
-            folders it found the file.
-        """
+        """Lists out all files, creates a dictionary of unique file names with a list off all parent 
+            folders it found the file."""
         print("Starting search...")
         for root, subdir, file in os.walk(self.start_dir):
             for f in file:
@@ -35,8 +31,8 @@ class FindDupes:
         print(f"Processing finished, listed all files in {self.start_dir}")
 
     def keep_dupes(self):
-        """ Method that goes through the list and pops the files that have a single parent. Split off
-        from find_files so find_files can be used alone. """
+        """Method that goes through the list and pops the files that have a single parent. Split off
+        from find_files so find_files can be used alone."""
         counter = 0  # just for the print, not really needed
         file_names = [name for name in self.all_files.keys()]
         for name in file_names:
@@ -49,10 +45,8 @@ class FindDupes:
         print(f"Processing finished, found {counter} duplicates")
 
     def build_output(self):
-        """
-            Overwrites the file at the location specified by output_loc (default: where the script was run 
-            from). The delimiter is set to ','. 
-        """
+        """Overwrites the file at the location specified by output_loc (default: where the script was run 
+            from). The delimiter is set to ','"""
         if self.all_files:
             err_list = []
             try:
